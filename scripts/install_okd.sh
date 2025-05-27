@@ -1,47 +1,76 @@
 #!/bin/bash
+set -euo pipefail
+
+# Log all commands
+set -x
 
 # Update system
 sudo dnf update -y
 
 # Install dependencies
-sudo dnf install -y git docker-ce podman openssl
+sudo dnf install -y git docker-ce podman openssl tar wget
+
+# Configure Docker to use overlay2
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<EOF
+{
+  "storage-driver": "overlay2"
+}
+EOF
 
 # Start and enable Docker
 sudo systemctl enable --now docker
 
+# Verify Docker is working
+sudo docker run hello-world
+
 # Install OKD client tools (oc)
-OKD_VERSION=${okd_version}
-wget https://github.com/okd-project/okd/releases/download/${OKD_VERSION}/openshift-client-linux-${OKD_VERSION}.tar.gz
+echo "Installing OKD version ${OKD_VERSION}"
+wget -q https://github.com/okd-project/okd/releases/download/${OKD_VERSION}/openshift-client-linux-${OKD_VERSION}.tar.gz
 tar xvf openshift-client-linux-${OKD_VERSION}.tar.gz
 sudo mv oc kubectl /usr/local/bin/
 rm -f openshift-client-linux-${OKD_VERSION}.tar.gz README.md
 
-# Install OKD cluster (minimal setup for demo)
-oc cluster up --base-dir=/opt/okd
+# Verify oc installation
+oc version
+
+# Install OKD cluster (CRC-like setup)
+echo "Starting OKD cluster"
+oc cluster up \
+  --base-dir=/opt/okd \
+  --skip-registry-check=true \
+  --public-hostname=$(curl -s ifconfig.me)
 
 # Wait for cluster to be ready
+echo "Waiting for cluster to be ready..."
 while ! oc get nodes 2>/dev/null | grep -q "Ready"; do
-  echo "Waiting for OKD cluster to be ready..."
   sleep 10
 done
 
 # Create projects and deploy microservices
-oc new-project microservice1
-oc new-project microservice2
+for project in microservice1 microservice2; do
+  oc new-project ${project}
+done
 
-# Clone and deploy microservice 1
-git clone ${microservice1_repo} /tmp/microservice1
-oc apply -f /tmp/microservice1/manifests/ -n microservice1
+# Deploy microservice 1
+if [ -n "${MICROSERVICE1_REPO}" ]; then
+  echo "Deploying microservice 1 from ${MICROSERVICE1_REPO}"
+  git clone ${MICROSERVICE1_REPO} /tmp/microservice1
+  oc apply -f /tmp/microservice1/manifests/ -n microservice1
+  oc expose svc/microservice1 -n microservice1
+fi
 
-# Clone and deploy microservice 2
-git clone ${microservice2_repo} /tmp/microservice2
-oc apply -f /tmp/microservice2/manifests/ -n microservice2
+# Deploy microservice 2
+if [ -n "${MICROSERVICE2_REPO}" ]; then
+  echo "Deploying microservice 2 from ${MICROSERVICE2_REPO}"
+  git clone ${MICROSERVICE2_REPO} /tmp/microservice2
+  oc apply -f /tmp/microservice2/manifests/ -n microservice2
+  oc expose svc/microservice2 -n microservice2
+fi
 
-# Expose services
-oc expose svc/microservice1 -n microservice1
-oc expose svc/microservice2 -n microservice2
-
-echo "OKD installation and microservices deployment completed!"
-echo "Cluster console: https://localhost:8443"
-echo "Microservice1 route: $(oc get route microservice1 -n microservice1 -o jsonpath='{.spec.host}')"
-echo "Microservice2 route: $(oc get route microservice2 -n microservice2 -o jsonpath='{.spec.host}')"
+# Get cluster information
+echo "OKD cluster deployed successfully!"
+echo "Cluster console: https://$(oc get routes console -n openshift-console -o jsonpath='{.spec.host}')"
+echo "Microservice1 route: https://$(oc get route microservice1 -n microservice1 -o jsonpath='{.spec.host}' 2>/dev/null || echo 'Not deployed')"
+echo "Microservice2 route: https://$(oc get route microservice2 -n microservice2 -o jsonpath='{.spec.host}' 2>/dev/null || echo 'Not deployed')"
+echo "Login with: oc login -u kubeadmin -p $(cat /opt/okd/auth/kubeadmin-password)"

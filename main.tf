@@ -37,9 +37,9 @@ resource "google_compute_instance" "okd_vm" {
   }
 
   metadata_startup_script = templatefile("${path.module}/scripts/install_okd.sh", {
-    okd_version = var.okd_version,
-    microservice1_repo = var.microservice1_repo,
-    microservice2_repo = var.microservice2_repo
+    OKD_VERSION       = var.okd_version,
+    MICROSERVICE1_REPO = var.microservice1_repo,
+    MICROSERVICE2_REPO = var.microservice2_repo
   })
 
   tags = ["http-server", "mysql-service"]
@@ -51,7 +51,7 @@ resource "google_compute_firewall" "allow_http" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "6443", "8443", "3306"]
+    ports    = ["80", "443", "6443", "8443"]
   }
 
   source_ranges = ["0.0.0.0/0"]
@@ -60,4 +60,8 @@ resource "google_compute_firewall" "allow_http" {
 
 output "vm_public_ip" {
   value = google_compute_instance.okd_vm.network_interface[0].access_config[0].nat_ip
+}
+
+output "ssh_command" {
+  value = "ssh ${var.ssh_user}@${google_compute_instance.okd_vm.network_interface[0].access_config[0].nat_ip}"
 }
