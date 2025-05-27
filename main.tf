@@ -37,10 +37,10 @@ resource "google_compute_instance" "okd_vm" {
   }
 
   metadata_startup_script = templatefile("${path.module}/scripts/install_okd.sh", {
-    OKD_VERSION       = var.okd_version,
+    OKD_VERSION        = var.okd_version,
     MICROSERVICE1_REPO = var.microservice1_repo,
     MICROSERVICE2_REPO = var.microservice2_repo,
-    PROJECT_ID        = var.gcp_project_id
+    PROJECT_ID         = var.gcp_project_id
   })
 
   tags = ["http-server", "mysql-service"]
@@ -52,7 +52,7 @@ resource "google_compute_firewall" "allow_http" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "6443", "8443"]
+    ports    = ["80", "443", "6443", "8443", "3306"]
   }
 
   source_ranges = ["0.0.0.0/0"]
