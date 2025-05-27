@@ -1,41 +1,56 @@
-name: 'Terraform Apply'
-
+name: Terraform Apply
 on:
   workflow_run:
     workflows: ['Terraform Plan']
-    types:
-      - completed
+    branches: [main]
+    types: [completed]
+
+env:
+  TF_VERSION: 1.5.0
 
 jobs:
-  terraform:
-    name: 'Terraform'
+  terraform-apply:
+    name: Terraform Apply
     runs-on: ubuntu-latest
     environment: production
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v2
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
-          path: .
+          path: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Setup GCP Auth
-        id: auth
-        uses: google-github-actions/auth@v0
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ github.event.workflow_run.inputs.gcp_credentials }}'
+          project_id: '${{ github.event.workflow_run.inputs.gcp_project_id }}'
+
+      - name: Terraform Init
+        working-directory: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
+        run: terraform init
 
       - name: Terraform Apply
-        id: apply
+        working-directory: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
         run: terraform apply -auto-approve tfplan
 
-      - name: Output VM IP
+      - name: Get Outputs
+        working-directory: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
         run: |
-          echo "VM Public IP: $(terraform output -raw vm_public_ip)"
-          echo "SSH Command: $(terraform output -raw ssh_command)"
+          echo "VM_PUBLIC_IP=$(terraform output -raw vm_public_ip)" >> $GITHUB_OUTPUT
+          echo "SSH_COMMAND=$(terraform output -raw ssh_command)" >> $GITHUB_OUTPUT
+
+      - name: Show Deployment Info
+        run: |
+          echo "VM Public IP: ${{ steps.get-outputs.outputs.VM_PUBLIC_IP }}"
+          echo "SSH Command: ${{ steps.get-outputs.outputs.SSH_COMMAND }}"
