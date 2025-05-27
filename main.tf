@@ -42,7 +42,7 @@ resource "google_compute_instance" "okd_vm" {
     microservice2_repo = var.microservice2_repo
   })
 
-  tags = ["http-server", "https-server"]
+  tags = ["http-server", "mysql-service"]
 }
 
 resource "google_compute_firewall" "allow_http" {
@@ -51,11 +51,11 @@ resource "google_compute_firewall" "allow_http" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "6443", "8443"]
+    ports    = ["80", "443", "6443", "8443", "3306"]
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["http-server", "https-server"]
+  target_tags   = ["http-server", "mysql-service"]
 }
 
 output "vm_public_ip" {
