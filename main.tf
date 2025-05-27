@@ -33,7 +33,7 @@ resource "google_compute_instance" "okd_vm" {
   }
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${file(var.ssh_pub_key_file)}"
+    ssh-keys = "${var.ssh_user}:${file("${pathexpand(var.ssh_pub_key_file)}")}"
   }
 
   metadata_startup_script = templatefile("${path.module}/scripts/install_okd.sh", {
