@@ -39,7 +39,8 @@ echo "Starting OKD cluster"
 oc cluster up \
   --base-dir=/opt/okd \
   --skip-registry-check=true \
-  --public-hostname=$(curl -s ifconfig.me)
+  --public-hostname=$(curl -s ifconfig.me) \
+  --name=${PROJECT_ID}-cluster  # Added cluster naming
 
 # Wait for cluster to be ready
 echo "Waiting for cluster to be ready..."
