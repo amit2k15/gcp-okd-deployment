@@ -1,0 +1,41 @@
+name: 'Terraform Apply'
+
+on:
+  workflow_run:
+    workflows: ['Terraform Plan']
+    types:
+      - completed
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan
+          path: .
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Setup GCP Auth
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ github.event.workflow_run.inputs.gcp_credentials }}'
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Output VM IP
+        run: |
+          echo "VM Public IP: $(terraform output -raw vm_public_ip)"
+          echo "SSH Command: $(terraform output -raw ssh_command)"

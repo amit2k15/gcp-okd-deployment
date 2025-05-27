@@ -1,0 +1,60 @@
+name: 'Terraform Plan'
+
+on:
+  workflow_dispatch:
+    inputs:
+      gcp_project_id:
+        description: 'GCP Project ID'
+        required: true
+      gcp_credentials:
+        description: 'GCP Service Account JSON'
+        required: true
+      microservice1_repo:
+        description: 'Microservice 1 Git Repository'
+        required: true
+      microservice2_repo:
+        description: 'Microservice 2 Git Repository'
+        required: true
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Setup GCP Auth
+        id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ github.event.inputs.gcp_credentials }}'
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var="gcp_project_id=${{ github.event.inputs.gcp_project_id }}" \
+            -var="microservice1_repo=${{ github.event.inputs.microservice1_repo }}" \
+            -var="microservice2_repo=${{ github.event.inputs.microservice2_repo }}" \
+            -out=tfplan
+        continue-on-error: true
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tfplan
+          path: tfplan
