@@ -50,7 +50,7 @@ done
 
 # Create projects and deploy microservices
 for project in microservice1 microservice2; do
-  oc new-project ${project}
+  oc new-project ${PROJECT_ID}
 done
 
 # Deploy microservice 1
