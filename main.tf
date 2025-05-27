@@ -61,7 +61,3 @@ resource "google_compute_firewall" "allow_http" {
 output "vm_public_ip" {
   value = google_compute_instance.okd_vm.network_interface[0].access_config[0].nat_ip
 }
-
-output "ssh_command" {
-  value = "ssh ${var.ssh_user}@${google_compute_instance.okd_vm.network_interface[0].access_config[0].nat_ip}"
-}
