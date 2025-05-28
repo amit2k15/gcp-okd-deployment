@@ -22,22 +22,6 @@ variable "ssh_user" {
 }
 
 variable "ssh_pub_key" {
-  description = "Path to the SSH public key file"
-  type        = string
-}
-
-variable "okd_version" {
-  description = "OKD version to install"
-  type        = string
-  default     = "4.12.0"
-}
-
-variable "microservice1_repo" {
-  description = "Git repository for microservice 1"
-  type        = string
-}
-
-variable "microservice2_repo" {
-  description = "Git repository for microservice 2"
+  description = "Raw SSH public key content"
   type        = string
 }

@@ -14,22 +14,20 @@ provider "google" {
 
 resource "google_compute_instance" "okd_vm" {
   name         = "okd-vm"
-  machine_type = "custom-4-8192" # 4 vCPUs, 8GB RAM
+  machine_type = "custom-4-8192"
   zone         = var.gcp_zone
 
   boot_disk {
     initialize_params {
       image = "centos-cloud/centos-stream-9"
-      size  = 50 # 50 GB disk
+      size  = 50
       type  = "pd-ssd"
     }
   }
 
   network_interface {
     network = "default"
-    access_config {
-      // Ephemeral public IP
-    }
+    access_config {}
   }
 
   metadata = {
@@ -37,10 +35,8 @@ resource "google_compute_instance" "okd_vm" {
   }
 
   metadata_startup_script = templatefile("${path.module}/scripts/install_okd.sh", {
-    OKD_VERSION        = var.okd_version,
-    MICROSERVICE1_REPO = var.microservice1_repo,
-    MICROSERVICE2_REPO = var.microservice2_repo,
-    PROJECT_ID         = var.gcp_project_id
+    OKD_VERSION = "4.17.0-okd-scos.0"
+    PROJECT_ID  = var.gcp_project_id
   })
 
   tags = ["http-server", "mysql-service"]
@@ -57,8 +53,4 @@ resource "google_compute_firewall" "allow_http" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["http-server", "mysql-service"]
-}
-
-output "vm_public_ip" {
-  value = google_compute_instance.okd_vm.network_interface[0].access_config[0].nat_ip
 }

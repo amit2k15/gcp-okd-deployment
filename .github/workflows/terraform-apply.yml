@@ -1,56 +1,21 @@
 name: Terraform Apply
-on:
-  workflow_run:
-    workflows: ['Terraform Plan']
-    branches: [main]
-    types: [completed]
 
-env:
-  TF_VERSION: 1.5.0
+on:
+  workflow_dispatch:
 
 jobs:
   terraform-apply:
-    name: Terraform Apply
     runs-on: ubuntu-latest
-    environment: production
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-          path: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Configure GCP credentials
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ github.event.workflow_run.inputs.gcp_credentials }}'
-          project_id: '${{ github.event.workflow_run.inputs.gcp_project_id }}'
+        uses: hashicorp/setup-terraform@v2
 
       - name: Terraform Init
-        working-directory: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
         run: terraform init
 
       - name: Terraform Apply
-        working-directory: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
         run: terraform apply -auto-approve tfplan
-
-      - name: Get Outputs
-        working-directory: ${{ github.event.workflow_run.inputs.tf_working_dir || '.' }}
-        run: |
-          echo "VM_PUBLIC_IP=$(terraform output -raw vm_public_ip)" >> $GITHUB_OUTPUT
-          echo "SSH_COMMAND=$(terraform output -raw ssh_command)" >> $GITHUB_OUTPUT
-
-      - name: Show Deployment Info
-        run: |
-          echo "VM Public IP: ${{ steps.get-outputs.outputs.VM_PUBLIC_IP }}"
-          echo "SSH Command: ${{ steps.get-outputs.outputs.SSH_COMMAND }}"
