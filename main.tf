@@ -41,7 +41,7 @@ resource "google_compute_instance" "okd_vm" {
 }
 
 resource "google_compute_firewall" "allow_http" {
-  name    = "allow-http"
+  name    = "allow-http-okd"
   network = "default"
 
   allow {
