@@ -15,13 +15,13 @@ provider "google" {
 
 resource "google_compute_instance" "okd_vm" {
   name         = "okd-vm"
-  machine_type = "custom-4-8192"
+  machine_type = "custom-8-16384"
   zone         = var.gcp_zone
 
   boot_disk {
     initialize_params {
       image = "centos-cloud/centos-stream-9"
-      size  = 50
+      size  = 100
       type  = "pd-ssd"
     }
   }
@@ -35,13 +35,13 @@ resource "google_compute_instance" "okd_vm" {
     ssh-keys = "${var.ssh_user}:${var.ssh_pub_key}"
   }
 
-  metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
+  #metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
 
   tags = ["http-server", "mysql-service"]
 }
 
-resource "google_compute_firewall" "allow_http_okd_new1" {
-  name    = "allow-http-okd-new1"
+resource "google_compute_firewall" "allow_http_okd_new2" {
+  name    = "allow-http-okd-new2"
   network = "default"
 
   allow {

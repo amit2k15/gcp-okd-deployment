@@ -7,25 +7,22 @@ set -x
 sudo dnf update -y
 
 # Install dependencies
-sudo dnf install -y git docker-ce podman openssl tar wget
+sudo dnf install -y git podman openssl tar wget
 
-# Configure Docker
-sudo mkdir -p /etc/docker
-sudo tee /etc/docker/daemon.json <<EOF
-{
-  "storage-driver": "overlay2"
-}
-EOF
+# Enable and start podman socket
+sudo systemctl enable --now podman.socket
 
-sudo systemctl enable --now docker
-sudo docker run hello-world
+# Verify podman installation
+podman --version
+
+
 
 # Install OKD CLI
-echo "Installing OKD version ${OKD_VERSION}"
-wget -q https://github.com/okd-project/okd/releases/download/${OKD_VERSION}/openshift-client-linux-${OKD_VERSION}.tar.gz
-tar xvf openshift-client-linux-${OKD_VERSION}.tar.gz
+echo "Installing OKD version 4.17.0-okd-scos.0"
+wget -q https://github.com/okd-project/okd/releases/download/4.17.0-okd-scos.0/openshift-client-linux-4.17.0-okd-scos.0.tar.gz
+tar xvf openshift-client-linux-4.17.0-okd-scos.0.tar.gz
 sudo mv oc kubectl /usr/local/bin/
-rm -f openshift-client-linux-${OKD_VERSION}.tar.gz README.md
+rm -f openshift-client-linux-4.17.0-okd-scos.0.tar.gz README.md
 
 oc version
 
