@@ -7,15 +7,22 @@ jobs:
   terraform-apply:
     runs-on: ubuntu-latest
 
+    env:
+      TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+      TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
+      TF_VAR_ssh_pub_key: ${{ secrets.SSH_PUB_KEY }}
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.7
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan

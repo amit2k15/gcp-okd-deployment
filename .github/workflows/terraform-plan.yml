@@ -7,26 +7,28 @@ jobs:
   terraform-plan:
     runs-on: ubuntu-latest
 
+    env:
+      TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+      TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
+      TF_VAR_ssh_pub_key: ${{ secrets.SSH_PUB_KEY }}
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.7
 
-      - name: Authenticate to GCP
-        run: |
-          echo "${{ secrets.GCP_CREDENTIALS }}" > "${{ github.workspace }}/gcp-key.json"
-          export GOOGLE_APPLICATION_CREDENTIALS="${{ github.workspace }}/gcp-key.json"
-          echo "GOOGLE_APPLICATION_CREDENTIALS=${{ github.workspace }}/gcp-key.json" >> $GITHUB_ENV
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Terraform Format
+      run: terraform fmt -check
 
-      - name: Terraform Validate
-        run: terraform validate
+    - name: Terraform Validate
+      run: terraform validate
 
-      - name: Terraform Plan
-        env:
-          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-        run: terraform plan -out=tfplan
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan

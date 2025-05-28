@@ -8,9 +8,9 @@ terraform {
 }
 
 provider "google" {
-  project = var.gcp_project_id
-  region  = var.gcp_region
-  credentials = file("${path.module}/../gcp-key.json")
+  project     = var.gcp_project_id
+  region      = var.gcp_region
+  credentials = var.gcp_credentials
 }
 
 resource "google_compute_instance" "okd_vm" {
@@ -35,10 +35,7 @@ resource "google_compute_instance" "okd_vm" {
     ssh-keys = "${var.ssh_user}:${var.ssh_pub_key}"
   }
 
-  metadata_startup_script = templatefile("${path.module}/scripts/install_okd.sh", {
-    OKD_VERSION = "4.17.0-okd-scos.0"
-    PROJECT_ID  = var.gcp_project_id
-  })
+  metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
 
   tags = ["http-server", "mysql-service"]
 }
@@ -54,4 +51,8 @@ resource "google_compute_firewall" "allow_http" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["http-server", "mysql-service"]
+}
+
+output "vm_public_ip" {
+  value = google_compute_instance.okd_vm.network_interface[0].access_config[0].nat_ip
 }

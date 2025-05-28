@@ -3,6 +3,12 @@ variable "gcp_project_id" {
   type        = string
 }
 
+variable "gcp_credentials" {
+  description = "The GCP service account JSON key (as a string)"
+  type        = string
+  sensitive   = true
+}
+
 variable "gcp_region" {
   description = "The GCP region"
   type        = string
@@ -22,7 +28,7 @@ variable "ssh_user" {
 }
 
 variable "ssh_pub_key" {
-  description = "SSH public key content (not file path)"
+  description = "Public SSH key content"
   type        = string
 }
 
