@@ -10,6 +10,7 @@ terraform {
 provider "google" {
   project = var.gcp_project_id
   region  = var.gcp_region
+  credentials = file("${path.module}/../gcp-key.json")
 }
 
 resource "google_compute_instance" "okd_vm" {

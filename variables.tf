@@ -22,6 +22,12 @@ variable "ssh_user" {
 }
 
 variable "ssh_pub_key" {
-  description = "Raw SSH public key content"
+  description = "SSH public key content (not file path)"
   type        = string
+}
+
+variable "okd_version" {
+  description = "OKD version to install"
+  type        = string
+  default     = "4.17.0-okd-scos.0"
 }
