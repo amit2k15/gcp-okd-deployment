@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+exec > /var/log/startup-script.log 2>&1
 set -x
 
 # Update system
