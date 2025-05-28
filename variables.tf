@@ -21,10 +21,9 @@ variable "ssh_user" {
   default     = "centos"
 }
 
-variable "ssh_pub_key_file" {
+variable "ssh_pub_key" {
   description = "Path to the SSH public key file"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
 }
 
 variable "okd_version" {
