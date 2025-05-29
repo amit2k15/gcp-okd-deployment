@@ -15,12 +15,12 @@ provider "google" {
 
 resource "google_compute_instance" "okd_vm" {
   name         = "okd-vm"
-  machine_type = "custom-8-16384"
+  machine_type = "custom-2-4096"
   zone         = var.gcp_zone
 
   boot_disk {
     initialize_params {
-      image = "fedora-coreos-cloud/fedora-coreos-stable"
+      image = "centos-cloud/centos-stream-9"
       size  = 100
       type  = "pd-ssd"
     }
@@ -46,7 +46,7 @@ resource "google_compute_firewall" "allow_http_okd_new3" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "6443", "8443", "3306"]
+    ports    = ["80", "443", "6443", "8443", "3306", "30000-32767", "3000", "10051", "10050"]
   }
 
   source_ranges = ["0.0.0.0/0"]
