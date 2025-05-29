@@ -32,8 +32,8 @@ variable "ssh_pub_key" {
   type        = string
 }
 
-variable "okd_version" {
-  description = "OKD version to install"
+variable "k8s_version" {
+  description = "k8s version to install"
   type        = string
-  default     = "4.17.0-okd-scos.0"
+  default     = "4.17.0-k8s-scos.0"
 }
