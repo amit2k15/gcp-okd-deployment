@@ -20,7 +20,7 @@ resource "google_compute_instance" "okd_vm" {
 
   boot_disk {
     initialize_params {
-      image = "centos-cloud/centos-stream-9"
+      image = "fedora-coreos-cloud/fedora-coreos-stable"
       size  = 100
       type  = "pd-ssd"
     }

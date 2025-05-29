@@ -7,3 +7,7 @@ output "ssh_command" {
   description = "Command to SSH into the instance"
   value       = "ssh ${var.ssh_user}@${google_compute_instance.okd_vm.network_interface[0].access_config[0].nat_ip}"
 }
+
+output "internal_dns_name" {
+  value = "${google_compute_instance.okd_vm.name}.${google_compute_instance.okd_vm.zone}.c.${var.project_id}.internal"
+}

@@ -24,7 +24,7 @@ variable "gcp_zone" {
 variable "ssh_user" {
   description = "SSH user name"
   type        = string
-  default     = "centos"
+  default     = "core"
 }
 
 variable "ssh_pub_key" {
