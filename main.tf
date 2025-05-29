@@ -40,8 +40,8 @@ resource "google_compute_instance" "okd_vm" {
   tags = ["http-server", "mysql-service"]
 }
 
-resource "google_compute_firewall" "allow_http_okd_new2" {
-  name    = "allow-http-okd-new2"
+resource "google_compute_firewall" "allow_http_okd_new3" {
+  name    = "allow-http-okd-new3"
   network = "default"
 
   allow {
