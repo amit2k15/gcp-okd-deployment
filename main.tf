@@ -15,13 +15,13 @@ provider "google" {
 
 resource "google_compute_instance" "jenkins_vm" {
   name         = "jenkins-vm"
-  machine_type = "e2-medium" # Recommended minimum for Jenkins
+  machine_type = "e2-medium"
   zone         = var.gcp_zone
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2204-lts" # Common choice for Jenkins
-      size  = 50                               # GB (can be adjusted based on needs)
+      image = "ubuntu-os-cloud/ubuntu-2204-lts"
+      size  = 50
       type  = "pd-ssd"
     }
   }
@@ -35,7 +35,6 @@ resource "google_compute_instance" "jenkins_vm" {
     ssh-keys = "${var.ssh_user}:${var.ssh_pub_key}"
   }
 
-  # Uncomment and modify if you have a Jenkins installation script
   # metadata_startup_script = file("${path.module}/scripts/install_jenkins.sh")
 
   tags = ["jenkins-server", "http-server"]
@@ -47,7 +46,7 @@ resource "google_compute_firewall" "allow_jenkins_ports" {
 
   allow {
     protocol = "tcp"
-    ports    = ["8080", "50000", "80", "443"] # Standard Jenkins ports + web ports
+    ports    = ["8080", "50000", "80", "443"]
   }
 
   source_ranges = ["0.0.0.0/0"]
