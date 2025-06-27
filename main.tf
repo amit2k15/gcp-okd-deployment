@@ -1,18 +1,3 @@
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 4.0"
-    }
-  }
-}
-
-provider "google" {
-  project     = var.gcp_project_id
-  region      = var.gcp_region
-  credentials = var.gcp_credentials
-}
-
 resource "google_compute_instance" "k8s_vm" {
   name         = "k8s-vm"
   machine_type = "custom-2-4096"
@@ -35,24 +20,18 @@ resource "google_compute_instance" "k8s_vm" {
     ssh-keys = "${var.ssh_user}:${var.ssh_pub_key}"
   }
 
-  #metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
-
-  tags = ["http-server", "mysql-service"]
+  tags = ["jenkins-server"]
 }
 
-resource "google_compute_firewall" "allow_http_okd_new3" {
-  name    = "allow-http-okd-new3"
+resource "google_compute_firewall" "allow_jenkins" {
+  name    = "allow-jenkins-traffic"
   network = "default"
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "6443", "8443", "3306", "30000-32767", "3000", "10051", "10050"]
+    ports    = ["22", "80", "443", "8080", "6443", "8443", "3306", "30000-32767", "3000", "10051", "10050"]
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["http-server", "mysql-service"]
-}
-
-output "vm_public_ip" {
-  value = google_compute_instance.k8s_vm.network_interface[0].access_config[0].nat_ip
+  target_tags   = ["jenkins-server"]
 }
