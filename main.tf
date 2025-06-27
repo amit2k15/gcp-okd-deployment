@@ -37,7 +37,7 @@ resource "google_compute_instance" "jenkins_vm" {
 
   #metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
 
-  tags = ["http-server", "Jenkins-server"]
+  tags = ["http-server", "jenkins-server"]
 }
 
 resource "google_compute_firewall" "allow-jenkins" {
