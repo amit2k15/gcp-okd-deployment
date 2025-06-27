@@ -14,14 +14,14 @@ provider "google" {
 }
 
 resource "google_compute_instance" "jenkins_vm" {
-  name         = "jenkins-vm"
-  machine_type = "e2-medium"
+  name         = "k8s-vm"
+  machine_type = "custom-2-4096"
   zone         = var.gcp_zone
 
   boot_disk {
     initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-2204-lts"
-      size  = 50
+      image = "centos-cloud/centos-stream-9"
+      size  = 100
       type  = "pd-ssd"
     }
   }
@@ -35,24 +35,24 @@ resource "google_compute_instance" "jenkins_vm" {
     ssh-keys = "${var.ssh_user}:${var.ssh_pub_key}"
   }
 
-  # metadata_startup_script = file("${path.module}/scripts/install_jenkins.sh")
+  #metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
 
-  tags = ["jenkins-server", "http-server"]
+  tags = ["http-server", "Jenkins-server"]
 }
 
-resource "google_compute_firewall" "allow_jenkins_ports" {
-  name    = "allow-jenkins-ports"
+resource "google_compute_firewall" "allow-jenkins" {
+  name    = "allow-jenkins"
   network = "default"
 
   allow {
     protocol = "tcp"
-    ports    = ["8080", "50000", "80", "443"]
+    ports    = ["80", "443", "8080", "50000", "3306"]
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["jenkins-server", "http-server"]
+  target_tags   = ["http-server", "jenkins-server"]
 }
 
 output "vm_public_ip" {
-  value = google_compute_instance.jenkins_vm.network_interface[0].access_config[0].nat_ip
+  value = google_compute_instance.k8s_vm.network_interface[0].access_config[0].nat_ip
 }
