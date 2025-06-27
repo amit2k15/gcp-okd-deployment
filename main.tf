@@ -14,7 +14,7 @@ provider "google" {
 }
 
 resource "google_compute_instance" "jenkins_vm" {
-  name         = "k8s-vm"
+  name         = "jenkins-vm"
   machine_type = "custom-2-4096"
   zone         = var.gcp_zone
 
@@ -54,5 +54,5 @@ resource "google_compute_firewall" "allow-jenkins" {
 }
 
 output "vm_public_ip" {
-  value = google_compute_instance.k8s_vm.network_interface[0].access_config[0].nat_ip
+  value = google_compute_instance.jenkins_vm.network_interface[0].access_config[0].nat_ip
 }
