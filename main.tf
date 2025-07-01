@@ -13,8 +13,8 @@ provider "google" {
   credentials = var.gcp_credentials
 }
 
-resource "google_compute_instance" "jenkins_vm" {
-  name         = "jenkins-vm"
+resource "google_compute_instance" "drone_vm" {
+  name         = "drone-vm"
   machine_type = "custom-2-4096"
   zone         = var.gcp_zone
 
@@ -37,11 +37,11 @@ resource "google_compute_instance" "jenkins_vm" {
 
   #metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
 
-  tags = ["http-server", "jenkins-server"]
+  tags = ["http-server", "drone-server"]
 }
 
-resource "google_compute_firewall" "allow-jenkins" {
-  name    = "allow-jenkins"
+resource "google_compute_firewall" "allow-drone" {
+  name    = "allow-drone"
   network = "default"
 
   allow {
@@ -50,9 +50,9 @@ resource "google_compute_firewall" "allow-jenkins" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["http-server", "jenkins-server"]
+  target_tags   = ["http-server", "drone-server"]
 }
 
 output "vm_public_ip" {
-  value = google_compute_instance.jenkins_vm.network_interface[0].access_config[0].nat_ip
+  value = google_compute_instance.drone_vm.network_interface[0].access_config[0].nat_ip
 }
