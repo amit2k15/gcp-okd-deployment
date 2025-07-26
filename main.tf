@@ -13,8 +13,8 @@ provider "google" {
   credentials = var.gcp_credentials
 }
 
-resource "google_compute_instance" "zabbix7.4_vm" {
-  name         = "zabbix7.4-vm"
+resource "google_compute_instance" "zabbix74_vm" {
+  name         = "zabbix74-vm"
   machine_type = "custom-2-4096"
   zone         = var.gcp_zone
 
@@ -37,11 +37,11 @@ resource "google_compute_instance" "zabbix7.4_vm" {
 
   #metadata_startup_script = file("${path.module}/scripts/install_okd.sh")
 
-  tags = ["http-server", "zabbix7.4-server"]
+  tags = ["http-server", "zabbix74-server"]
 }
 
-resource "google_compute_firewall" "allow-zabbix7.4" {
-  name    = "allow-zabbix7.4"
+resource "google_compute_firewall" "allow-zabbix74" {
+  name    = "allow-zabbix74"
   network = "default"
 
   allow {
@@ -50,9 +50,9 @@ resource "google_compute_firewall" "allow-zabbix7.4" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["http-server", "zabbix7.4-server"]
+  target_tags   = ["http-server", "zabbix74-server"]
 }
 
 output "vm_public_ip" {
-  value = google_compute_instance.zabbix7.4_vm.network_interface[0].access_config[0].nat_ip
+  value = google_compute_instance.zabbix74_vm.network_interface[0].access_config[0].nat_ip
 }
