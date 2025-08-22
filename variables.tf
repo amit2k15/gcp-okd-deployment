@@ -18,7 +18,7 @@ variable "gcp_region" {
 variable "gcp_zone" {
   description = "The GCP zone"
   type        = string
-  default     = "us-central1-a"
+  default     = "us-central1-b"
 }
 
 variable "ssh_user" {
