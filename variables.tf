@@ -12,13 +12,13 @@ variable "gcp_credentials" {
 variable "gcp_region" {
   description = "The GCP region"
   type        = string
-  default     = "us-central1"
+  default     = "asia-south2"
 }
 
 variable "gcp_zone" {
   description = "The GCP zone"
   type        = string
-  default     = "us-central1-b"
+  default     = "asia-south2-a"
 }
 
 variable "ssh_user" {
